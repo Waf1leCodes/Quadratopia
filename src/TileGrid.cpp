@@ -29,8 +29,7 @@ bool TileGrid::IsOnGrid(int x, int y) {
     return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-void TileGrid::Render(std::map<Tribes, TribeData> &tribes, Rectangle viewport, int level) {
-
+void TileGrid::Render(std::map<Tribes, TribeData> &tribes, Rectangle viewport, Vector2 screenSize, int level) {
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             Tile &tile = GetAt(x, y);
@@ -40,10 +39,8 @@ void TileGrid::Render(std::map<Tribes, TribeData> &tribes, Rectangle viewport, i
             Vector2 screenPos = toScreenPos({(float) x, (float) y}, level);
             Rectangle dest = {screenPos.x + width * tileWidth / 2, screenPos.y, (float) texture.width, (float) texture.height};
 
-            if (dest.x < viewport.x + viewport.width && dest.y < viewport.y + viewport.height) {
-                if (dest.x + dest.width >= viewport.x && dest.y + dest.height >= viewport.y) {
-                    DrawTexturePro(texture, {0, 0, (float) texture.width, (float) texture.height}, dest, {0, 0}, 0, WHITE);
-                }
+            if (CheckCollisionRecs(viewport, dest) && CheckCollisionRecs({0, 0, screenSize.x, screenSize.y}, dest)) {
+                DrawTexturePro(texture, {0, 0, (float) texture.width, (float) texture.height}, dest, {0, 0}, 0, WHITE);
             }
         }
     }

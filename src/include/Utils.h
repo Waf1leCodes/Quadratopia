@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "debug.h"
 
+using std::floor, std::ceil, std::round, std::abs, std::min, std::max;
+
 inline Vector2 operator + (Vector2 const &v1, Vector2 const &v2) { 
     Vector2 v{v1.x + v2.x, v1.y + v2.y}; 
     return v;

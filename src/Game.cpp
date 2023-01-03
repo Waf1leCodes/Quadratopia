@@ -43,7 +43,6 @@ void GameScreen::Initialize() {
     dragVel = {0, 0};
     cam.scroll = {0, 0};
     cam.zoom = 1;
-    // cam = Cam {{-((float) GetScreenWidth() - tileWidth) / 2, -tileHeight * 2}, 1};
 }
 
 void GameScreen::Update() {
@@ -53,12 +52,19 @@ void GameScreen::Update() {
 
 void GameScreen::Draw() {
     BeginTextureMode(renderTarget);
-        ClearBackground({20, 20, 20, 255});
-        game.bottom.Render(tribes, GetCurrentViewPort(), 0);
+        ClearBackground(BLANK);
+        DrawRectangle(0, 0, 250, 250, RED);
     EndTextureMode();
 
     Rectangle source = GetCurrentViewPort();
-    DrawTexturePro(renderTarget.texture, {cam.scroll.x, -cam.scroll.y, source.width, -source.height}, {0, 0, (float) currentSW, (float) currentSH}, {0, 0}, 0, WHITE);
+
+    if (source.x + source.width > renderTarget.texture.width)
+        source.width -= (source.x + source.width) - renderTarget.texture.width;
+
+    print(source.width);
+    
+    Rectangle dest = {0, 0, source.width * cam.zoom, (float) source.height * cam.zoom};
+    DrawTexturePro(renderTarget.texture, {cam.scroll.x, -cam.scroll.y, source.width, -source.height}, dest, {0, 0}, 0, WHITE);
 }
 
 void GameScreen::Unload() {
@@ -70,17 +76,7 @@ void GameScreen::Unload() {
 }
 
 Rectangle GameScreen::GetCurrentViewPort() {
-    Rectangle viewport = {std::max(cam.scroll.x, 0.0f), std::max(cam.scroll.y, 0.0f), currentSW / cam.zoom, currentSH / cam.zoom};
-
-    viewport.width -= std::max(viewport.x + viewport.width - renderTarget.texture.width, 0.0f);
-    viewport.height -= std::max(viewport.y + viewport.height - renderTarget.texture.height, 0.0f);
-
-    if (viewport.height < 0)
-        viewport.height = 0;
-
-    if (viewport.width < 0)
-        viewport.width = 0;
-
+    Rectangle viewport = {max(floor(cam.scroll.x), 0.0f), max(floor(cam.scroll.y), 0.0f), currentSW / cam.zoom, currentSH / cam.zoom};
     return viewport;
 }
 
@@ -88,8 +84,7 @@ void GameScreen::UpdateRenderTarget(bool reset) {
     if (currentSW != GetScreenWidth() || currentSH != GetScreenHeight() || reset) {
         currentSW = GetScreenWidth();
         currentSH = GetScreenHeight();
-
-        renderTarget = LoadRenderTexture(tileWidth * (currentSW / (tileWidth * minZoom)), tileHeight * (currentSH / (tileHeight * minZoom)));
+        renderTarget = LoadRenderTexture(currentSW, currentSH);
         SetTextureFilter(renderTarget.texture, TEXTURE_FILTER_BILINEAR);
     }
 }
@@ -118,7 +113,7 @@ void HandleMovement(Cam &cam) {
         cam.scroll = cam.scroll + dragVel;
 
         int dimValue = 1.5;
-        if (std::abs(dragVel.x) < dimValue)
+        if (abs(dragVel.x) < dimValue)
             dragVel.x = 0;
         else
             if (dragVel.x > 0)
@@ -126,7 +121,7 @@ void HandleMovement(Cam &cam) {
             else
                 dragVel.x += dimValue;
 
-        if (std::abs(dragVel.y) < dimValue)
+        if (abs(dragVel.y) < dimValue)
             dragVel.y = 0;
         else
             if (dragVel.y > 0)

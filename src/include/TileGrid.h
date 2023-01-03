@@ -37,5 +37,5 @@ public:
     int IndexAt(int x, int y);
     bool IsOnGrid(int x, int y);
 
-    void Render(std::map<Tribes, TribeData> &tribes, Rectangle viewport, int level=0);
+    void Render(std::map<Tribes, TribeData> &tribes, Rectangle viewport, Vector2 screenSize, int level=0);
 };
